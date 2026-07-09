@@ -51,7 +51,12 @@ func RunApplication() {
 	zap.L().Info("Starting the e-commerce application...")
 
 	// Initialize database connection
-
+	err := configs.ConnectionDatabase()
+	if err != nil {
+		zap.L().Fatal("Failed to connect to the database", zap.Error(err))
+		return
+	}
+	zap.L().Info("Database connection established successfully")
 	// Running Migrations
 
 	// Running Seeders
@@ -97,7 +102,7 @@ func RunApplication() {
 			zap.L().Fatal("Server forced to shutdown", zap.Error(err))
 		}
 
-		// configs.CloseDatabase()
+		configs.CloseDatabase()
 		<-ctx.Done()
 		zap.L().Info("Server shutdown gracefully")
 	}
