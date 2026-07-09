@@ -28,7 +28,7 @@ func RunApplication() {
 	// Initialize the Fiber application
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(c fiber.Ctx, err error) error {
-			return httpresponse.Error(c, fiber.StatusInternalServerError, err.Error(), nil)
+			return httpresponse.InternalServerError(c, err.Error())
 		},
 	})
 
@@ -70,7 +70,7 @@ func RunApplication() {
 	}
 
 	app.Get("/", func(c fiber.Ctx) error {
-		return c.SendString("Hello, World!")
+		return httpresponse.Success(c, fiber.StatusOK, "E-Commerce API is running", nil)
 	})
 
 	srvErr := make(chan error, 1)
