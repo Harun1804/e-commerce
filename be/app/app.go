@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"harun1804/e-commerce/configs"
+	"harun1804/e-commerce/database/migrations"
 	"harun1804/e-commerce/pkg/httpresponse"
 	"os"
 	"os/signal"
@@ -57,7 +58,10 @@ func RunApplication() {
 		return
 	}
 	zap.L().Info("Database connection established successfully")
+
 	// Running Migrations
+	migrations.RunMigrations()
+	zap.L().Info("Database migrations completed successfully")
 
 	// Running Seeders
 
@@ -66,8 +70,9 @@ func RunApplication() {
 	// Initialize Swagger Setup
 
 	// Setup Containers
-
+	container := BuildContainers()
 	// Setup Routes
+	SetupRoutes(app, container)
 
 	port := cfg.App.Port
 	if port == 0 {
@@ -75,7 +80,7 @@ func RunApplication() {
 	}
 
 	app.Get("/", func(c fiber.Ctx) error {
-		return httpresponse.Success(c, fiber.StatusOK, "E-Commerce API is running", nil)
+		return httpresponse.Success(c, "E-Commerce API is running", nil)
 	})
 
 	srvErr := make(chan error, 1)

@@ -112,7 +112,7 @@ func newPagination(page, size int, totalData int64) *Pagination {
 	}
 
 	if size < 1 {
-		size = 1
+		size = 10
 	}
 
 	if totalData < 0 {
