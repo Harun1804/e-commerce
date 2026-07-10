@@ -5,8 +5,16 @@ go 1.25.5
 require go.uber.org/zap v1.28.0
 
 require (
+	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
+)
+
+require (
 	github.com/andybalholm/brotli v1.2.2 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/go-playground/validator/v10 v10.30.3
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gofiber/fiber/v3 v3.4.0
 	github.com/gofiber/schema v1.8.0 // indirect
