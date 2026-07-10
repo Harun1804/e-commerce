@@ -31,13 +31,13 @@ func WithPagination(page, size int, totalData int64) Option {
 }
 
 // Success sends a 200 OK response with data.
-func Success(c fiber.Ctx, code int, message string, data interface{}) error {
-	return send(c, code, true, message, data)
+func Success(c fiber.Ctx, message string, data interface{}) error {
+	return send(c, fiber.StatusOK, true, message, data)
 }
 
 // SuccessWithPagination sends a 200 OK response including pagination info.
-func SuccessWithPagination(c fiber.Ctx, code int, message string, data interface{}, page, limit int, totalData int64) error {
-	return send(c, code, true, message, data, WithPagination(page, limit, totalData))
+func SuccessWithPagination(c fiber.Ctx, message string, data interface{}, page, limit int, totalData int64) error {
+	return send(c, fiber.StatusOK, true, message, data, WithPagination(page, limit, totalData))
 }
 
 func BadRequest(c fiber.Ctx, data interface{}) error {
@@ -64,8 +64,8 @@ func ValidationError(c fiber.Ctx, data interface{}) error {
 	return sendError(c, fiber.StatusUnprocessableEntity, "Validation failed", data)
 }
 
-func InternalServerError(c fiber.Ctx, message string) error {
-	return sendError(c, fiber.StatusInternalServerError, InternalServerErrorMessage(message), nil)
+func InternalServerError(c fiber.Ctx, data interface{}) error {
+	return sendError(c, fiber.StatusInternalServerError, InternalServerErrorMessage(""), data)
 }
 
 func send(c fiber.Ctx, code int, status bool, message string, data interface{}, opts ...Option) error {
