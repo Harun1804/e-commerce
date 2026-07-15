@@ -13,6 +13,7 @@ func RunMigrations() {
 		&accessModel.Role{},
 		&accessModel.Permission{},
 		&pivot.RolePermission{},
+		&accessModel.User{},
 	)
 
 	if err != nil {

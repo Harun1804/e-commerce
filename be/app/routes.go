@@ -13,4 +13,5 @@ func SetupRoutes(app *fiber.App, container *Containers) {
 	access := api.Group("/access")
 	accessRoutes.RoleRoutes(access, container.RoleController)
 	accessRoutes.PermissionRoutes(access, container.PermissionController)
+	accessRoutes.UserRoutes(access, container.UserController)
 }
