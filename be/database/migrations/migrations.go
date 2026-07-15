@@ -10,6 +10,7 @@ import (
 func RunMigrations() {
 	err := configs.DB.AutoMigrate(
 		&accessModel.Role{},
+		&accessModel.Permission{},
 	)
 
 	if err != nil {

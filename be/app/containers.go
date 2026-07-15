@@ -10,6 +10,7 @@ import (
 
 type Containers struct {
 	RoleController accessCtrl.RoleControllerInterface
+	PermissionController accessCtrl.PermissionControllerInterface
 }
 
 func BuildContainers() *Containers {
@@ -17,8 +18,9 @@ func BuildContainers() *Containers {
 }
 
 func NewContainers(db *gorm.DB) *Containers {
-	roleController, _ := accessMod.BuildAccessModule(db)
+	roleController, _, permissionController, _ := accessMod.BuildAccessModule(db)
 	return &Containers{
 		RoleController: roleController,
+		PermissionController: permissionController,
 	}
 }

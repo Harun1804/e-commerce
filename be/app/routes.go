@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/gofiber/fiber/v3"
 	accessRoutes "harun1804/e-commerce/modules/access/routes"
+
+	"github.com/gofiber/fiber/v3"
 )
 
 func SetupRoutes(app *fiber.App, container *Containers) {
@@ -11,4 +12,5 @@ func SetupRoutes(app *fiber.App, container *Containers) {
 	// Access module routes
 	access := api.Group("/access")
 	accessRoutes.RoleRoutes(access, container.RoleController)
+	accessRoutes.PermissionRoutes(access, container.PermissionController)
 }
