@@ -11,7 +11,6 @@ import (
 	"harun1804/e-commerce/pkg/validator"
 
 	"github.com/gofiber/fiber/v3"
-	"go.uber.org/zap"
 )
 
 type RoleControllerInterface interface {
@@ -45,7 +44,6 @@ func (r *RoleController) GetAllRoles(c fiber.Ctx) error {
 		return httpresponse.BadRequest(c, details)
 	}
 
-	zap.L().Info("Received search request: ", zap.Any("searchReq", searchReq))
 	filter := role.NewRoleFilter(searchReq)
 
 	roles, totalData, err := r.roleUsecase.GetAllRoles(ctx, filter)
