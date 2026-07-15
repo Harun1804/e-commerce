@@ -9,6 +9,7 @@ import (
 	"harun1804/e-commerce/pkg/httpresponse"
 	"harun1804/e-commerce/pkg/logger"
 	"harun1804/e-commerce/pkg/validator"
+	"strconv"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -19,6 +20,8 @@ type RoleControllerInterface interface {
 	CreateRole(c fiber.Ctx) error
 	UpdateRole(c fiber.Ctx) error
 	DeleteRole(c fiber.Ctx) error
+	AttachRolePermission(c fiber.Ctx) error
+	DetachRolePermission(c fiber.Ctx) error
 }
 
 type RoleController struct {
@@ -74,7 +77,8 @@ func (r *RoleController) GetRoleByID(c fiber.Ctx) error {
 	}
 
 	id := conv.StringToUint(roleID)
-	roleModel, err := r.roleUsecase.GetRoleByID(ctx, id)
+	needDetailPermission, _ := strconv.ParseBool(c.Query("needDetailPermission", "false"))
+	roleModel, err := r.roleUsecase.GetRoleByID(ctx, id, needDetailPermission)
 	if err != nil {
 		logger.FailIfError(2, err)
 		details := httpresponse.ErrorDetail(err)
@@ -177,4 +181,72 @@ func (r *RoleController) DeleteRole(c fiber.Ctx) error {
 	}
 
 	return httpresponse.Success(c, httpresponse.DeleteMessage(r.entity, true), nil)
+}
+
+// AttachRolePermission implements [RoleControllerInterface].
+func (r *RoleController) AttachRolePermission(c fiber.Ctx) error {
+	ctx := c.RequestCtx()
+
+	roleID := c.Params("id")
+	if roleID == "" {
+		logger.FailIfError(1, errors.New("id parameter is required"))
+		details := httpresponse.ErrorDetail(errors.New("id parameter is required"))
+		return httpresponse.BadRequest(c, details)
+	}
+
+	req := role.RolePermissionRequest{}
+	if err := c.Bind().Body(&req); err != nil {
+		logger.FailIfError(2, err)
+		details := httpresponse.ErrorDetail(err)
+		return httpresponse.BadRequest(c, details)
+	}
+
+	if err := validator.Validate(&req); err != nil {
+		logger.FailIfError(3, err)
+		details := httpresponse.ErrorDetail(err)
+		return httpresponse.ValidationError(c, details)
+	}
+
+	id := conv.StringToUint(roleID)
+	if err := r.roleUsecase.AttachRolePermission(ctx, id, req.PermissionIds); err != nil {
+		logger.FailIfError(4, err)
+		details := httpresponse.ErrorDetail(err)
+		return httpresponse.InternalServerError(c, details)
+	}
+
+	return httpresponse.Success(c, httpresponse.UpdateMessage("Role permission", true), nil)
+}
+
+// DetachRolePermission implements [RoleControllerInterface].
+func (r *RoleController) DetachRolePermission(c fiber.Ctx) error {
+	ctx := c.RequestCtx()
+
+	roleID := c.Params("id")
+	if roleID == "" {
+		logger.FailIfError(1, errors.New("id parameter is required"))
+		details := httpresponse.ErrorDetail(errors.New("id parameter is required"))
+		return httpresponse.BadRequest(c, details)
+	}
+
+	req := role.RolePermissionRequest{}
+	if err := c.Bind().Body(&req); err != nil {
+		logger.FailIfError(2, err)
+		details := httpresponse.ErrorDetail(err)
+		return httpresponse.BadRequest(c, details)
+	}
+
+	if err := validator.Validate(&req); err != nil {
+		logger.FailIfError(3, err)
+		details := httpresponse.ErrorDetail(err)
+		return httpresponse.ValidationError(c, details)
+	}
+
+	id := conv.StringToUint(roleID)
+	if err := r.roleUsecase.DetachRolePermission(ctx, id, req.PermissionIds); err != nil {
+		logger.FailIfError(4, err)
+		details := httpresponse.ErrorDetail(err)
+		return httpresponse.InternalServerError(c, details)
+	}
+
+	return httpresponse.Success(c, httpresponse.UpdateMessage("Role permission", true), nil)
 }

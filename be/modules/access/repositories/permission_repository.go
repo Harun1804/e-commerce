@@ -13,6 +13,7 @@ import (
 type PermissionRepositoryInterface interface {
 	GetAllPermissions(ctx context.Context, filter permission.PermissionFilterSearch) ([]models.Permission, int64, error)
 	GetPermissionByID(ctx context.Context, id uint) (*models.Permission, error)
+	GetPermissionsByIDs(ctx context.Context, ids []uint) ([]models.Permission, error)
 	CreatePermission(ctx context.Context, permission models.Permission) error
 	UpdatePermission(ctx context.Context, permission models.Permission) error
 	DeletePermission(ctx context.Context, id uint) error
@@ -67,6 +68,24 @@ func (p *PermissionRepository) GetPermissionByID(ctx context.Context, id uint) (
 		return nil, err
 	}
 	return permissionModel, nil
+}
+
+// GetPermissionsByIDs implements [PermissionRepositoryInterface].
+func (p *PermissionRepository) GetPermissionsByIDs(ctx context.Context, ids []uint) ([]models.Permission, error) {
+	permissions := []models.Permission{}
+	if len(ids) == 0 {
+		return permissions, nil
+	}
+
+	if err := p.db.WithContext(ctx).
+		Select(permissionAttrFields).
+		Where("id IN ?", ids).
+		Find(&permissions).Error; err != nil {
+		logger.FailIfError(1, err)
+		return nil, err
+	}
+
+	return permissions, nil
 }
 
 // CreatePermission implements [PermissionRepositoryInterface].

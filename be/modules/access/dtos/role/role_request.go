@@ -19,6 +19,10 @@ type RoleRequest struct {
 	Description string `json:"description" validate:"omitempty,max=255"`
 }
 
+type RolePermissionRequest struct {
+	PermissionIds []uint `json:"permission_ids" validate:"required,min=1,dive,required"`
+}
+
 var roleAllowedSort = map[string]bool{
 	"id":          true,
 	"name":        true,

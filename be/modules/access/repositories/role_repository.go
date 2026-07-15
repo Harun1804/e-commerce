@@ -12,7 +12,7 @@ import (
 
 type RoleRepositoryInterface interface {
 	GetAllRoles(ctx context.Context, filter role.RoleFilterSearch) ([]models.Role, int64, error)
-	GetRoleByID(ctx context.Context, id uint) (*models.Role, error)
+	GetRoleByID(ctx context.Context, id uint, needDetailPermission bool) (*models.Role, error)
 	CreateRole(ctx context.Context, role models.Role) error
 	UpdateRole(ctx context.Context, role models.Role) error
 	DeleteRole(ctx context.Context, id uint) error
@@ -58,12 +58,19 @@ func (r *RoleRepository) GetAllRoles(ctx context.Context, filter role.RoleFilter
 }
 
 // GetRoleByID implements [RoleRepositoryInterface].
-func (r *RoleRepository) GetRoleByID(ctx context.Context, id uint) (*models.Role, error) {
+func (r *RoleRepository) GetRoleByID(ctx context.Context, id uint, needDetailPermission bool) (*models.Role, error) {
 	roleModel := &models.Role{}
-	if err := r.db.WithContext(ctx).
+	query := r.db.WithContext(ctx).
 		Select(roleAttrFields).
-		First(roleModel, id).
-		Error; err != nil {
+		Model(&models.Role{})
+
+	if needDetailPermission {
+		query = query.Preload("Permissions", func(db *gorm.DB) *gorm.DB {
+			return db.Select(permissionAttrFields)
+		})
+	}
+
+	if err := query.First(roleModel, id).Error; err != nil {
 		logger.FailIfError(1, err)
 		return nil, err
 	}

@@ -16,11 +16,13 @@ func BuildAccessModule(db *gorm.DB) (
 	usecases.PermissionUsecaseInterface,
 ) {
 	roleRepo := repositories.NewRoleRepository(db)
-	roleUsecase := usecases.NewRoleUsecase(roleRepo)
-	roleController := controllers.NewRoleController(roleUsecase)
-
 	permissionRepo := repositories.NewPermissionRepository(db)
+	rolePermissionRepo := repositories.NewRolePermissionRepository(db)
+
+	roleUsecase := usecases.NewRoleUsecase(roleRepo, permissionRepo, rolePermissionRepo)
 	permissionUsecase := usecases.NewPermissionUsecase(permissionRepo)
+	
+	roleController := controllers.NewRoleController(roleUsecase)
 	permissionController := controllers.NewPermissionController(permissionUsecase)
 
 	return roleController, roleUsecase, permissionController, permissionUsecase
