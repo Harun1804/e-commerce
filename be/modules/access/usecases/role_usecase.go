@@ -16,8 +16,8 @@ type RoleUsecaseInterface interface {
 	GetAllRoles(ctx context.Context, filter role.RoleFilterSearch) ([]models.Role, int64, error)
 	GetRoleByID(ctx context.Context, roleID uint, needDetailPermission bool) (*models.Role, error)
 	GetRolesByIDs(ctx context.Context, ids []uint, needDetailPermission bool) ([]models.Role, error)
-	CreateRole(ctx context.Context, role models.Role) error
-	UpdateRole(ctx context.Context, role models.Role) error
+	CreateRole(ctx context.Context, role models.Role, permissionIDs []uint) error
+	UpdateRole(ctx context.Context, role models.Role, permissionIDs []uint) error
 	DeleteRole(ctx context.Context, roleID uint) error
 	AttachRolePermission(ctx context.Context, roleID uint, permissionIDs []uint) error
 	DetachRolePermission(ctx context.Context, roleID uint, permissionIDs []uint) error
@@ -64,17 +64,37 @@ func (r *roleUsecase) GetRolesByIDs(ctx context.Context, ids []uint, needDetailP
 }
 
 // CreateRole implements RoleUsecaseInterface.
-func (r *roleUsecase) CreateRole(ctx context.Context, role models.Role) error {
-	return r.roleRepo.CreateRole(ctx, role)
+func (r *roleUsecase) CreateRole(ctx context.Context, role models.Role, permissionIDs []uint) error {
+	if err := r.roleRepo.CreateRole(ctx, role); err != nil {
+		return err
+	}
+
+	if len(permissionIDs) > 0 {
+		if err := r.rolePermissionRepo.AttachRolePermission(ctx, role.ID, permissionIDs); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // UpdateRole implements RoleUsecaseInterface.
-func (r *roleUsecase) UpdateRole(ctx context.Context, role models.Role) error {
+func (r *roleUsecase) UpdateRole(ctx context.Context, role models.Role, permissionIDs []uint) error {
 	err := r.roleRepo.UpdateRole(ctx, role)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New(httpresponse.NotFoundMessage(r.entity, "id", role.ID))
 	}
-	return err
+	if err != nil {
+		return err
+	}
+
+	if len(permissionIDs) > 0 {
+		if err := r.SyncRolePermissions(ctx, role.ID, permissionIDs); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // DeleteRole implements RoleUsecaseInterface.

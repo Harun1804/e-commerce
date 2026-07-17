@@ -15,16 +15,13 @@ type RoleSearchRequest struct {
 }
 
 type RoleRequest struct {
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description" validate:"omitempty,max=255"`
+	Name          string `json:"name" validate:"required"`
+	Description   string `json:"description" validate:"omitempty,max=255"`
+	PermissionIds []uint `json:"permissionIds" validate:"required,min=1,dive,required"`
 }
 
 type RolePermissionRequest struct {
-	PermissionIds []uint `json:"permission_ids" validate:"required,min=1,dive,required"`
-}
-
-type RolePermissionSyncRequest struct {
-	PermissionIds []uint `json:"permission_ids" validate:"required,dive,required"`
+	PermissionIds []uint `json:"permissionIds" validate:"required,min=1,dive,required"`
 }
 
 var roleAllowedSort = map[string]bool{
