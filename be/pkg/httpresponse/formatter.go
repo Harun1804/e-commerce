@@ -1,9 +1,12 @@
 package httpresponse
 
 import (
+	"errors"
 	"reflect"
+	"strings"
 
 	"github.com/gofiber/fiber/v3"
+	"gorm.io/gorm"
 )
 
 type Option func(*Response)
@@ -66,6 +69,16 @@ func ValidationError(c fiber.Ctx, data interface{}) error {
 
 func InternalServerError(c fiber.Ctx, data interface{}) error {
 	return sendError(c, fiber.StatusInternalServerError, InternalServerErrorMessage(""), data)
+}
+
+func Error(c fiber.Ctx, err error) error {
+	details := ErrorDetail(err)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(strings.ToLower(err.Error()), "not found") {
+		return sendError(c, fiber.StatusNotFound, err.Error(), details)
+	}
+
+	return InternalServerError(c, details)
 }
 
 func send(c fiber.Ctx, code int, status bool, message string, data interface{}, opts ...Option) error {

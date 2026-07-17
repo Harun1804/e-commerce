@@ -23,3 +23,6 @@ tmp
 
 # Environment files
 .env
+
+# Cache files
+*.cache
