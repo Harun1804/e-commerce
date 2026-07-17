@@ -22,6 +22,7 @@ type RoleControllerInterface interface {
 	DeleteRole(c fiber.Ctx) error
 	AttachRolePermission(c fiber.Ctx) error
 	DetachRolePermission(c fiber.Ctx) error
+	SyncRolePermissions(c fiber.Ctx) error
 }
 
 type RoleController struct {
@@ -52,8 +53,7 @@ func (r *RoleController) GetAllRoles(c fiber.Ctx) error {
 	roles, totalData, err := r.roleUsecase.GetAllRoles(ctx, filter)
 	if err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	var roleResponses []role.RoleResponse
@@ -81,8 +81,7 @@ func (r *RoleController) GetRoleByID(c fiber.Ctx) error {
 	roleModel, err := r.roleUsecase.GetRoleByID(ctx, id, needDetailPermission)
 	if err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	roleResp := role.NewRoleResponse(roleModel)
@@ -114,8 +113,7 @@ func (r *RoleController) CreateRole(c fiber.Ctx) error {
 
 	if err := r.roleUsecase.CreateRole(ctx, reqModel); err != nil {
 		logger.FailIfError(3, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.CreateMessage(r.entity, true), nil)
@@ -155,8 +153,7 @@ func (r *RoleController) UpdateRole(c fiber.Ctx) error {
 
 	if err := r.roleUsecase.UpdateRole(ctx, reqModel); err != nil {
 		logger.FailIfError(3, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.UpdateMessage(r.entity, true), nil)
@@ -176,8 +173,7 @@ func (r *RoleController) DeleteRole(c fiber.Ctx) error {
 	id := conv.StringToUint(roleID)
 	if err := r.roleUsecase.DeleteRole(ctx, id); err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.DeleteMessage(r.entity, true), nil)
@@ -210,8 +206,7 @@ func (r *RoleController) AttachRolePermission(c fiber.Ctx) error {
 	id := conv.StringToUint(roleID)
 	if err := r.roleUsecase.AttachRolePermission(ctx, id, req.PermissionIds); err != nil {
 		logger.FailIfError(4, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.UpdateMessage("Role permission", true), nil)
@@ -228,7 +223,7 @@ func (r *RoleController) DetachRolePermission(c fiber.Ctx) error {
 		return httpresponse.BadRequest(c, details)
 	}
 
-	req := role.RolePermissionRequest{}
+	req := role.RolePermissionSyncRequest{}
 	if err := c.Bind().Body(&req); err != nil {
 		logger.FailIfError(2, err)
 		details := httpresponse.ErrorDetail(err)
@@ -244,8 +239,37 @@ func (r *RoleController) DetachRolePermission(c fiber.Ctx) error {
 	id := conv.StringToUint(roleID)
 	if err := r.roleUsecase.DetachRolePermission(ctx, id, req.PermissionIds); err != nil {
 		logger.FailIfError(4, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
+	}
+
+	return httpresponse.Success(c, httpresponse.UpdateMessage("Role permission", true), nil)
+}
+
+func (r *RoleController) SyncRolePermissions(c fiber.Ctx) error {
+	ctx := c.RequestCtx()
+
+	roleID := c.Params("id")
+	if roleID == "" {
+		err := errors.New("id parameter is required")
+		logger.FailIfError(1, err)
+		return httpresponse.BadRequest(c, httpresponse.ErrorDetail(err))
+	}
+
+	req := role.RolePermissionRequest{}
+	if err := c.Bind().Body(&req); err != nil {
+		logger.FailIfError(2, err)
+		return httpresponse.BadRequest(c, httpresponse.ErrorDetail(err))
+	}
+
+	if err := validator.Validate(&req); err != nil {
+		logger.FailIfError(3, err)
+		return httpresponse.ValidationError(c, httpresponse.ErrorDetail(err))
+	}
+
+	id := conv.StringToUint(roleID)
+	if err := r.roleUsecase.SyncRolePermissions(ctx, id, req.PermissionIds); err != nil {
+		logger.FailIfError(4, err)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.UpdateMessage("Role permission", true), nil)

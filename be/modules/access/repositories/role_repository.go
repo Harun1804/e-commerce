@@ -13,6 +13,7 @@ import (
 type RoleRepositoryInterface interface {
 	GetAllRoles(ctx context.Context, filter role.RoleFilterSearch) ([]models.Role, int64, error)
 	GetRoleByID(ctx context.Context, id uint, needDetailPermission bool) (*models.Role, error)
+	GetRolesByIDs(ctx context.Context, ids []uint, needDetailPermission bool) ([]models.Role, error)
 	CreateRole(ctx context.Context, role models.Role) error
 	UpdateRole(ctx context.Context, role models.Role) error
 	DeleteRole(ctx context.Context, id uint) error
@@ -76,6 +77,36 @@ func (r *RoleRepository) GetRoleByID(ctx context.Context, id uint, needDetailPer
 	}
 
 	return roleModel, nil
+}
+
+// GetRolesByIDs implements [RoleRepositoryInterface].
+func (r *RoleRepository) GetRolesByIDs(ctx context.Context, ids []uint, needDetailPermission bool) ([]models.Role, error) {
+	roles := []models.Role{}
+	if len(ids) == 0 {
+		return roles, nil
+	}
+
+	if err := r.db.WithContext(ctx).
+		Select(roleAttrFields).
+		Where("id IN ?", ids).
+		Find(&roles).Error; err != nil {
+		logger.FailIfError(1, err)
+		return nil, err
+	}
+
+	if needDetailPermission {
+		for i := range roles {
+			if err := r.db.WithContext(ctx).
+				Model(&roles[i]).
+				Association("Permissions").
+				Find(&roles[i].Permissions); err != nil {
+				logger.FailIfError(2, err)
+				return nil, err
+			}
+		}
+	}
+
+	return roles, nil
 }
 
 // CreateRole implements [RoleRepositoryInterface].

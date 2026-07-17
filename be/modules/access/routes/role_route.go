@@ -10,10 +10,11 @@ func RoleRoutes(router fiber.Router, roleController controllers.RoleControllerIn
 	roleRoutes := router.Group("/roles")
 
 	roleRoutes.Get("/", roleController.GetAllRoles)
-	roleRoutes.Post("/:id/permissions/attach", roleController.AttachRolePermission)
-	roleRoutes.Post("/:id/permissions/detach", roleController.DetachRolePermission)
 	roleRoutes.Get("/:id", roleController.GetRoleByID)
 	roleRoutes.Post("/", roleController.CreateRole)
+	roleRoutes.Post("/:id/permissions/attach", roleController.AttachRolePermission)
+	roleRoutes.Post("/:id/permissions/detach", roleController.DetachRolePermission)
 	roleRoutes.Put("/:id", roleController.UpdateRole)
+	roleRoutes.Put("/:id/permissions", roleController.SyncRolePermissions)
 	roleRoutes.Delete("/:id", roleController.DeleteRole)
 }

@@ -9,6 +9,7 @@ import (
 )
 
 type RolePermissionRepositoryInterface interface {
+	GetPermissionIDsByRoleID(ctx context.Context, roleId uint) ([]uint, error)
 	AttachRolePermission(ctx context.Context, roleId uint, permissionIds []uint) error
 	DetachRolePermission(ctx context.Context, roleId uint, permissionIds []uint) error
 }
@@ -21,6 +22,19 @@ func NewRolePermissionRepository(db *gorm.DB) RolePermissionRepositoryInterface 
 	return &RolePermissionRepository{
 		db: db,
 	}
+}
+
+// GetPermissionIDsByRoleID implements [RolePermissionRepositoryInterface].
+func (r *RolePermissionRepository) GetPermissionIDsByRoleID(ctx context.Context, roleId uint) ([]uint, error) {
+	permissionIds := []uint{}
+	if err := r.db.WithContext(ctx).
+		Model(&pivot.RolePermission{}).
+		Where("role_id = ?", roleId).
+		Pluck("permission_id", &permissionIds).Error; err != nil {
+		return nil, err
+	}
+
+	return permissionIds, nil
 }
 
 // AttachRolePermission implements [RolePermissionRepositoryInterface].
