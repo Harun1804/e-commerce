@@ -23,7 +23,7 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-var userAttrFields = []string{"id", "username", "password", "created_at"}
+var userAttrFields = []string{"id", "username", "created_at"}
 
 func NewUserRepository(db *gorm.DB) UserRepositoryInterface {
 	return &UserRepository{db: db}

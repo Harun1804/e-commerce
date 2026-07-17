@@ -48,8 +48,7 @@ func (u *UserController) GetAllUsers(c fiber.Ctx) error {
 	users, totalData, err := u.userUsecase.GetAllUsers(ctx, filter)
 	if err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	var userResponse []user.UserResponse
@@ -75,8 +74,7 @@ func (u *UserController) GetUserByID(c fiber.Ctx) error {
 	userModel, err := u.userUsecase.GetUserByID(ctx, id)
 	if err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	userResp := user.NewUserResponse(userModel)
@@ -86,7 +84,7 @@ func (u *UserController) GetUserByID(c fiber.Ctx) error {
 // CreateUser implements [UserControllerInterface].
 func (u *UserController) CreateUser(c fiber.Ctx) error {
 	ctx := c.RequestCtx()
-	req := user.UserRequest{}
+	req := user.CreateUserRequest{}
 	if err := c.Bind().Body(&req); err != nil {
 		logger.FailIfError(1, err)
 		details := httpresponse.ErrorDetail(err)
@@ -104,10 +102,9 @@ func (u *UserController) CreateUser(c fiber.Ctx) error {
 		Password: req.Password,
 	}
 
-	if err := u.userUsecase.CreateUser(ctx, reqModel); err != nil {
+	if err := u.userUsecase.CreateUser(ctx, reqModel, req.RoleIds); err != nil {
 		logger.FailIfError(3, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.CreateMessage(u.entity, true), nil)
@@ -124,7 +121,7 @@ func (u *UserController) UpdateUser(c fiber.Ctx) error {
 	}
 
 	id := conv.StringToUint(userID)
-	req := user.UserRequest{}
+	req := user.UpdateUserRequest{}
 	if err := c.Bind().Body(&req); err != nil {
 		logger.FailIfError(2, err)
 		details := httpresponse.ErrorDetail(err)
@@ -146,10 +143,9 @@ func (u *UserController) UpdateUser(c fiber.Ctx) error {
 		reqModel.Password = req.Password
 	}
 
-	if err := u.userUsecase.UpdateUser(ctx, reqModel); err != nil {
+	if err := u.userUsecase.UpdateUser(ctx, reqModel, req.RoleIds); err != nil {
 		logger.FailIfError(4, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.UpdateMessage(u.entity, true), nil)
@@ -170,8 +166,7 @@ func (u *UserController) DeleteUser(c fiber.Ctx) error {
 
 	if err := u.userUsecase.DeleteUser(ctx, id); err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.DeleteMessage(u.entity, true), nil)

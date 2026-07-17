@@ -14,16 +14,27 @@ type UserSearchRequest struct {
 	SortOrder string `json:"sortOrder" validate:"omitempty,oneof=asc desc"`
 }
 
-type UserRequest struct {
+type CreateUserRequest struct {
+	Username string `json:"username" binding:"required" validate:"required,min=3,max=100"`
+	Password string `json:"password" binding:"required" validate:"required,min=5"`
+	RoleIds  []uint `json:"roleIds" validate:"required,min=1,dive,required"`
+}
+
+type UpdateUserRequest struct {
 	Username string `json:"username" binding:"required" validate:"required,min=3,max=100"`
 	Password string `json:"password" binding:"required" validate:"omitempty,min=5"`
+	RoleIds  []uint `json:"roleIds" validate:"required,min=1,dive,required"`
+}
+
+type UserRoleRequest struct {
+	RoleIds []uint `json:"roleIds" validate:"required,dive,required"`
 }
 
 var userAllowedSort = map[string]bool{
-	"id":          true,
-	"username":    true,
-	"created_at":  true,
-	"updated_at":  true,
+	"id":         true,
+	"username":   true,
+	"created_at": true,
+	"updated_at": true,
 }
 
 func NewUserFilter(req UserSearchRequest) UserFilterSearch {

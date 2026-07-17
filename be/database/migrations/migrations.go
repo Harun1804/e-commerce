@@ -12,8 +12,9 @@ func RunMigrations() {
 	err := configs.DB.AutoMigrate(
 		&accessModel.Role{},
 		&accessModel.Permission{},
-		&pivot.RolePermission{},
 		&accessModel.User{},
+		&pivot.RolePermission{},
+		&pivot.RoleUser{},
 	)
 
 	if err != nil {
