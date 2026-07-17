@@ -23,6 +23,10 @@ type RolePermissionRequest struct {
 	PermissionIds []uint `json:"permission_ids" validate:"required,min=1,dive,required"`
 }
 
+type RolePermissionSyncRequest struct {
+	PermissionIds []uint `json:"permission_ids" validate:"required,dive,required"`
+}
+
 var roleAllowedSort = map[string]bool{
 	"id":          true,
 	"name":        true,
