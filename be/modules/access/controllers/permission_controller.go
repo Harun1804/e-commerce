@@ -49,8 +49,7 @@ func (p *PermissionController) GetAllPermissions(c fiber.Ctx) error {
 	permissions, totalData, err := p.permissionUsecase.GetAllPermissions(ctx, filter)
 	if err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	var permissionResponses []permission.PermissionResponse
@@ -77,8 +76,7 @@ func (p *PermissionController) GetPermissionByID(c fiber.Ctx) error {
 	permissionModel, err := p.permissionUsecase.GetPermissionByID(ctx, id)
 	if err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	permissionResp := permission.NewPermissionResponse(permissionModel)
@@ -110,8 +108,7 @@ func (p *PermissionController) CreatePermission(c fiber.Ctx) error {
 
 	if err := p.permissionUsecase.CreatePermission(ctx, reqModel); err != nil {
 		logger.FailIfError(3, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.CreateMessage(p.entity, true), nil)
@@ -151,8 +148,7 @@ func (p *PermissionController) UpdatePermission(c fiber.Ctx) error {
 
 	if err := p.permissionUsecase.UpdatePermission(ctx, reqModel); err != nil {
 		logger.FailIfError(3, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.UpdateMessage(p.entity, true), nil)
@@ -172,8 +168,7 @@ func (p *PermissionController) DeletePermission(c fiber.Ctx) error {
 	id := conv.StringToUint(permissionID)
 	if err := p.permissionUsecase.DeletePermission(ctx, id); err != nil {
 		logger.FailIfError(2, err)
-		details := httpresponse.ErrorDetail(err)
-		return httpresponse.InternalServerError(c, details)
+		return httpresponse.Error(c, err)
 	}
 
 	return httpresponse.Success(c, httpresponse.DeleteMessage(p.entity, true), nil)

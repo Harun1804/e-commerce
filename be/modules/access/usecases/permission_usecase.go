@@ -14,6 +14,7 @@ import (
 type PermissionUsecaseInterface interface {
 	GetAllPermissions(ctx context.Context, filter permission.PermissionFilterSearch) ([]models.Permission, int64, error)
 	GetPermissionByID(ctx context.Context, id uint) (*models.Permission, error)
+	GetPermissionsByIDs(ctx context.Context, ids []uint) ([]models.Permission, error)
 	CreatePermission(ctx context.Context, permission models.Permission) error
 	UpdatePermission(ctx context.Context, permission models.Permission) error
 	DeletePermission(ctx context.Context, id uint) error
@@ -21,13 +22,13 @@ type PermissionUsecaseInterface interface {
 
 type permissionUsecase struct {
 	permissionRepo repositories.PermissionRepositoryInterface
-	entity   string
+	entity         string
 }
 
 func NewPermissionUsecase(permissionRepo repositories.PermissionRepositoryInterface) PermissionUsecaseInterface {
 	return &permissionUsecase{
 		permissionRepo: permissionRepo,
-		entity:   "Permission",
+		entity:         "Permission",
 	}
 }
 
@@ -39,6 +40,11 @@ func (p *permissionUsecase) GetAllPermissions(ctx context.Context, filter permis
 // GetPermissionByID implements PermissionUsecaseInterface.
 func (p *permissionUsecase) GetPermissionByID(ctx context.Context, id uint) (*models.Permission, error) {
 	return p.permissionRepo.GetPermissionByID(ctx, id)
+}
+
+// GetPermissionsByIDs implements [PermissionUsecaseInterface].
+func (p *permissionUsecase) GetPermissionsByIDs(ctx context.Context, ids []uint) ([]models.Permission, error) {
+	return p.permissionRepo.GetPermissionsByIDs(ctx, ids)
 }
 
 // CreatePermission implements PermissionUsecaseInterface.
