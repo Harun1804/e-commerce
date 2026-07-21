@@ -1,7 +1,10 @@
 package conv
 
 import (
+	"fmt"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -59,4 +62,31 @@ func MissingValues(values []uint, existing []uint) []uint {
 	}
 
 	return missing
+}
+
+func GenerateSlug(input string, isNeedTimestamp bool) string {
+	// Convert to lowercase
+	slug := strings.ToLower(input)
+
+	// Replace spaces and underscores with "-"
+	slug = strings.ReplaceAll(slug, "_", "-")
+	slug = strings.ReplaceAll(slug, " ", "-")
+
+	// Remove invalid characters
+	reg := regexp.MustCompile(`[^a-z0-9\-]+`)
+	slug = reg.ReplaceAllString(slug, "")
+
+	// Replace multiple "-" with single "-"
+	reg = regexp.MustCompile(`-+`)
+	slug = reg.ReplaceAllString(slug, "-")
+
+	// Trim "-" at beginning/end
+	slug = strings.Trim(slug, "-")
+
+	if isNeedTimestamp {
+		timestamp := time.Now().Unix()
+		slug = fmt.Sprintf("%s-%d", slug, timestamp)
+	}
+
+	return slug
 }
