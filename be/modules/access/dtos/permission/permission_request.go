@@ -16,6 +16,7 @@ type PermissionSearchRequest struct {
 
 type PermissionRequest struct {
 	Name        string `json:"name" validate:"required"`
+	Module      string `json:"module" validate:"required"`
 	Description string `json:"description" validate:"omitempty,max=255"`
 }
 

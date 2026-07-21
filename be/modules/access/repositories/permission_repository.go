@@ -23,7 +23,7 @@ type PermissionRepository struct {
 	db *gorm.DB
 }
 
-var permissionAttrFields = []string{"id", "name", "description"}
+var permissionAttrFields = []string{"id", "name", "slug", "module", "description"}
 
 func NewPermissionRepository(db *gorm.DB) PermissionRepositoryInterface {
 	return &PermissionRepository{db: db}

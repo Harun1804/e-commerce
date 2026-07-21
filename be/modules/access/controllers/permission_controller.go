@@ -103,6 +103,7 @@ func (p *PermissionController) CreatePermission(c fiber.Ctx) error {
 
 	reqModel := models.Permission{
 		Name:        req.Name,
+		Module:      req.Module,
 		Description: req.Description,
 	}
 
@@ -143,6 +144,7 @@ func (p *PermissionController) UpdatePermission(c fiber.Ctx) error {
 	reqModel := models.Permission{
 		ID:          id,
 		Name:        req.Name,
+		Module:      req.Module,
 		Description: req.Description,
 	}
 

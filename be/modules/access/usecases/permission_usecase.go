@@ -6,6 +6,7 @@ import (
 	"harun1804/e-commerce/modules/access/dtos/permission"
 	"harun1804/e-commerce/modules/access/models"
 	"harun1804/e-commerce/modules/access/repositories"
+	"harun1804/e-commerce/pkg/conv"
 	"harun1804/e-commerce/pkg/httpresponse"
 
 	"gorm.io/gorm"
@@ -49,11 +50,16 @@ func (p *permissionUsecase) GetPermissionsByIDs(ctx context.Context, ids []uint)
 
 // CreatePermission implements PermissionUsecaseInterface.
 func (p *permissionUsecase) CreatePermission(ctx context.Context, permission models.Permission) error {
+	permission.Slug = conv.GenerateSlug(permission.Name, true)
 	return p.permissionRepo.CreatePermission(ctx, permission)
 }
 
 // UpdatePermission implements PermissionUsecaseInterface.
 func (p *permissionUsecase) UpdatePermission(ctx context.Context, permission models.Permission) error {
+	if permission.Name != "" {
+		permission.Slug = conv.GenerateSlug(permission.Name, true)
+	}
+
 	err := p.permissionRepo.UpdatePermission(ctx, permission)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New(httpresponse.NotFoundMessage(p.entity, "id", permission.ID))
